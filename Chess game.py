@@ -80,6 +80,7 @@ def updateState():
 active_piece = None
 turn = 'White'
 valid_moves = []
+sfx1 = pygame.mixer.Sound('sfx/sfx1.ogg')
 
 while True:
     for event in pygame.event.get():
@@ -127,8 +128,7 @@ while True:
                 # Removes attacked_square if theres a piece of the opposite color
                 if attacked_square is not None:
                     pieces.remove(attacked_square)
-                    pygame.mixer.music.load('sfx/sfx1.ogg')
-                    pygame.mixer.music.play(0)
+                    pygame.mixer.Sound.play(sfx1)
 
                 
                 elif active_piece.__class__.__name__ == 'Pawn':
@@ -137,14 +137,11 @@ while True:
                             if turn == 'White':
                                 if piece.x == column and piece.y == row+1:
                                     pieces.remove(piece)
-                                    pygame.mixer.music.load('sfx/sfx1.ogg')
-                                    pygame.mixer.music.play(0)
-
+                                    pygame.mixer.Sound.play(sfx1)
                             elif turn == 'Black':
                                 if piece.x == column and piece.y == row-1:
                                     pieces.remove(piece)
-                                    pygame.mixer.music.load('sfx/sfx1.ogg')
-                                    pygame.mixer.music.play(0)
+                                    pygame.mixer.Sound.play(sfx1)
 
                     
                 # Changes active piece location to where mouse1 was released
@@ -197,7 +194,6 @@ while True:
     
     # Draw valid moves
     try:
-        
         for move in valid_moves:
             pygame.draw.circle(screen, color='Gray', center=(move[0]*60 + 30, move[1]*60 + 30), radius=10, width=3)
     except:
