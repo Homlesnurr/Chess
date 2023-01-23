@@ -123,10 +123,13 @@ while True:
             
             else:
                 attacked_square = has_piece(column, row, pieces, active_piece.color) if [column, row] in valid_moves else None
-                
+
                 # Removes attacked_square if theres a piece of the opposite color
                 if attacked_square is not None:
                     pieces.remove(attacked_square)
+                    pygame.mixer.music.load('sfx/sfx1.ogg')
+                    pygame.mixer.music.play(0)
+
                 
                 elif active_piece.__class__.__name__ == 'Pawn':
                     for piece in pieces:
@@ -134,9 +137,15 @@ while True:
                             if turn == 'White':
                                 if piece.x == column and piece.y == row+1:
                                     pieces.remove(piece)
+                                    pygame.mixer.music.load('sfx/sfx1.ogg')
+                                    pygame.mixer.music.play(0)
+
                             elif turn == 'Black':
                                 if piece.x == column and piece.y == row-1:
-                                    pieces.remove(piece)                                    
+                                    pieces.remove(piece)
+                                    pygame.mixer.music.load('sfx/sfx1.ogg')
+                                    pygame.mixer.music.play(0)
+
                     
                 # Changes active piece location to where mouse1 was released
                 active_piece.x = column
