@@ -42,7 +42,40 @@ class Knight(Piece):
         self.image = pygame.image.load("icons/Knight " + self.color + ".png")
 
     def validMoves(self, pieces):
-        pass
+        # Initiate default values
+        moves = []
+        attacking_moves = []
+        x = self.x
+        y = self.y
+        
+        # dx1 and dy1 are the first set of moves
+        dx1 = [-1,1]
+        dy1 = [-2,2]
+        
+        # dx2 and dy2 are the second set of moves
+        dx2 = [-2,2]
+        dy2 = [-1,1]
+        
+        # Looks for where knight can move
+        for moveX in dx1:
+            for moveY in dy1:
+                if self.inBoard(x + moveX, y + moveY) and has_piece(x + moveX, y + moveY, pieces, self.color) == None:
+                    moves.append([x + moveX, y + moveY])
+                elif self.inBoard(x + moveX, y + moveY) and has_piece(x + moveX, y + moveY, pieces, self.color):
+                    attacking_moves.append([x + moveX, y + moveY])
+                else:
+                    pass
+                
+        for moveX in dx2:
+            for moveY in dy2:
+                if self.inBoard(x + moveX, y + moveY) and has_piece(x + moveX, y + moveY, pieces, self.color) == None:
+                    moves.append([x + moveX, y + moveY])
+                elif self.inBoard(x + moveX, y + moveY) and has_piece(x + moveX, y + moveY, pieces, self.color):
+                    attacking_moves.append([x + moveX, y + moveY])
+                else:
+                    pass
+           
+        return moves, attacking_moves
 
 class Queen(Piece):
     def __init__(self, color, x, y):
@@ -50,8 +83,19 @@ class Queen(Piece):
         self.image = pygame.image.load("icons/Queen " + self.color + ".png")
 
     def validMoves(self, pieces):
-        pass
-    
+         # Initiate default values
+        moves = []
+        x = self.x
+        y = self.y
+        
+        # dx and dy are the moves the queen can make
+        dx = [x for x in range(8)]
+        dy = dy.copy()
+        
+        for moveX in dx:
+            if self.inBoard(x+moveX, y) and has_piece(x+moveX, y, pieces, self.color) == None:
+                moves.append([x+moveX, y])
+
 class King(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
@@ -59,7 +103,26 @@ class King(Piece):
         self.castle = True
     
     def validMoves(self, pieces):
-        pass
+        # Initiate default values
+        moves = []
+        attacking_moves = []
+        x = self.x
+        y = self.y
+        
+        # dx and dy are the moves the king can make
+        dx = [-1, 0, 1]
+        dy = [-1, 0, 1]
+        
+        # Looks for where king can move
+        for moveX in dx:
+            for moveY in dy:
+                if self.inBoard(x + moveX, y + moveY) and has_piece(x + moveX, y + moveY, pieces, self.color) == None:
+                    moves.append([x + moveX, y + moveY])
+                elif self.inBoard(x + moveX, y + moveY) and has_piece(x + moveX, y + moveY, pieces, self.color):
+                    attacking_moves.append([x + moveX, y + moveY])
+                else:
+                    pass
+        return moves, attacking_moves
     
     def disableCastle(self):
         self.castle = False
@@ -74,6 +137,7 @@ class Pawn(Piece):
     def validMoves(self, pieces):
         # Initiate default values
         moves = []
+        attacking_moves = []
         x = self.x
         y = self.y
         dy = 0
@@ -83,17 +147,17 @@ class Pawn(Piece):
         for possible in attack:         
             # Check if there is peice diagonally
             if self.inBoard(x+possible, y-1) and has_piece(x+possible, y-1, pieces, self.color) and self.color == 'White':
-                moves.append([x+possible, y-1])
+                attacking_moves.append([x+possible, y-1])
             elif self.inBoard(x+possible, y+1) and has_piece(x+possible, y+1, pieces, self.color) and self.color == 'Black':
-                moves.append([x+possible, y+1])
+                attacking_moves.append([x+possible, y+1])
             
             # Checks for en passant
             pos_piece = has_piece(x+possible, y, pieces, self.color)
             if self.inBoard(x+possible, y) and pos_piece and pos_piece.__class__.__name__ == 'Pawn' and pos_piece.enpassant == True:
                 if self.color == 'White':
-                    moves.append([x+possible, y-1])
+                    attacking_moves.append([x+possible, y-1])
                 else:
-                    moves.append([x+possible, y+1])
+                    attacking_moves.append([x+possible, y+1])
 
         
         # First move if pawn is White
@@ -104,29 +168,29 @@ class Pawn(Piece):
                 moves.append([x, y+dy])
             
             # Returns possible moves
-            return moves
+            return moves, attacking_moves
                 
         # Black variation
         elif self.isMoved == False and self.color == 'Black':            
             while self.inBoard(x, y+1+dy) and has_piece(x, y+1+dy, pieces, 'any') == None and dy < 2:
                 dy += 1
                 moves.append([x, y+dy])
-            return moves
+            return moves, attacking_moves
         
        
         # Possible moves after Pawn is moved
         elif self.color == 'White':
             # Checks if Pawn can move one forward
-            if has_piece(x, y-1, pieces, 'any') == None:
+            if has_piece(x, y-1, pieces, self.color) == None:
                 moves.append([x, y-1])
             
             # Returns possible moves
-            return moves
+            return moves, attacking_moves
         # Black variation
         elif self.color == 'Black':
-            if has_piece(x, y+1, pieces, 'any') == None:
+            if has_piece(x, y+1, pieces, self.color) == None:
                 moves.append([x, y+1])
-            return moves
+            return moves, attacking_moves
 
     def moved(self, double):
         self.isMoved = True
