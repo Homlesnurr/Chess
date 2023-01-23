@@ -3,7 +3,6 @@ import sys
 
 from Pieces import *
 from HasPiece import *
-from ValidMoves import *
 
 # Initialize pygame
 pygame.init()
@@ -81,6 +80,7 @@ active_piece = None
 turn = 'White'
 valid_moves = []
 sfx1 = pygame.mixer.Sound('sfx/sfx1.ogg')
+sfx1.set_volume(0.2)
 
 while True:
     for event in pygame.event.get():
