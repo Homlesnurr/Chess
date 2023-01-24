@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 
 from Pieces import *
 from HasPiece import *
@@ -81,8 +82,24 @@ turn = 'White'
 valid_moves = []
 in_valid_moves = False
 holding = False
-sfx1 = pygame.mixer.Sound('sfx/sfx1.ogg')
-sfx1.set_volume(0.2)
+
+
+capture1 = pygame.mixer.Sound('sfx/capture1.wav')
+capture2 = pygame.mixer.Sound('sfx/capture2.wav')
+castle1 = pygame.mixer.Sound('sfx/castle1.wav')
+castle2 = pygame.mixer.Sound('sfx/castle2.wav')
+check1 = pygame.mixer.Sound('sfx/check1.wav')
+check2 = pygame.mixer.Sound('sfx/check2.wav')
+move1 = pygame.mixer.Sound('sfx/move1.wav')
+move2 = pygame.mixer.Sound('sfx/move2.wav')
+ough = pygame.mixer.Sound('sfx/ough.ogg')
+
+capture = [pygame.mixer.Sound('sfx/capture1.wav'), pygame.mixer.Sound('sfx/capture2.wav'), pygame.mixer.Sound('sfx/ough.ogg')]
+castle = [pygame.mixer.Sound('sfx/castle1.wav'), pygame.mixer.Sound('sfx/castle2.wav')]
+check = [pygame.mixer.Sound('sfx/check1.wav'), pygame.mixer.Sound('sfx/check2.wav')]
+movesound = [pygame.mixer.Sound('sfx/move1.wav'), pygame.mixer.Sound('sfx/move2.wav')]
+
+
 using_pawn = False
 
 while True:
@@ -227,7 +244,7 @@ while True:
                 # Removes attacked_Piece if theres a piece of the opposite color
                 if attacked_Piece is not None:
                     pieces.remove(attacked_Piece)
-                    pygame.mixer.Sound.play(sfx1)
+                    pygame.mixer.Sound.play(random.choice(capture))
                 
                 # Checks if pawn is attacking enpassant
                 elif active_piece.__class__.__name__ == 'Pawn':
@@ -236,15 +253,17 @@ while True:
                             if turn == 'White':
                                 if piece.x == column and piece.y == row+1:
                                     pieces.remove(piece)
-                                    pygame.mixer.Sound.play(sfx1)
+                                    pygame.mixer.Sound.play(random.choice(capture))
                             elif turn == 'Black':
                                 if piece.x == column and piece.y == row-1:
                                     pieces.remove(piece)
-                                    pygame.mixer.Sound.play(sfx1)                                    
+                                    pygame.mixer.Sound.play(random.choice(capture))                                    
                     
                 # Changes active piece location to where mouse1 was released
                 active_piece.x = column
                 active_piece.y = row
+                pygame.mixer.Sound.play(random.choice(movesound))
+                
                 
                 # Next turn if piece is placed in a new position
                 if turn == 'White' and (active_piece.x != active_piece.lastPlacedX or active_piece.y != active_piece.lastPlacedY):
