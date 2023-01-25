@@ -19,13 +19,61 @@ class Piece:
         else:
             return False
 
+    # Check if king is in check
+    def checkForChecks(self, pieces, move):
+        
+        '''
+        When a piece is selected, it goes through this function, to check if moving the piece will put the king in check
+        if it does, this will return true, and the move will not be allowed
+        if it doesn't, this will return false, and the move will be allowed
+        
+        self is the piece that is being moved
+        pieces is the list of all the pieces
+        move is the move that is being checked
+        '''
+        
+        # Creates a backup of the last placed x and y
+        oldX = self.x
+        oldY = self.y
+        
+        # Changes the last placed (because has_piece checks the last placed, not the current position)
+        self.lastPlacedX = move[0]
+        self.lastPlacedY = move[1]
+        
+        '''At this point, the piece has been moved, but it will be moved back to its original position at the end of the function'''
+        
+        # Finds the king
+        for piece in pieces:
+            if isinstance(piece, King) and piece.color == self.color:
+                king = piece
+                break
+        
+        # Goes through all the enemy pieces, 
+        for piece in pieces:
+            if piece.color != self.color:
+                # If piece can attack the king, this if statement will be true
+                if [king.lastPlacedX, king.lastPlacedY, 'Attack'] in piece.validMoves(pieces, True):
+                    # If the moving piece can attack the checking piece, this if statement will be true, and the move will be allowed
+                    if self.lastPlacedX == piece.x and self.lastPlacedY == piece.y:
+                        self.lastPlacedX = oldX
+                        self.lastPlacedY = oldY
+                        return False
+                    # If the moving piece can't attack the checking piece and cant stop a check, this if statement will be true, and the move will not be allowed
+                    self.lastPlacedX = oldX
+                    self.lastPlacedY = oldY
+                    return True
+                
+        # If the king is not in check, this will be returned
+        self.lastPlacedX = oldX
+        self.lastPlacedY = oldY
+        return False
 
 class Rook(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
         self.image = pygame.image.load("icons/Rook " + self.color + ".png")
 
-    def validMoves(self, pieces):
+    def validMoves(self, pieces, skipCheck = False):
         # Initiate default values
         moves = []
         x = self.x
@@ -40,7 +88,7 @@ class Rook(Piece):
         for move in max_range:
             # Checks if rook can move right, and if there is a piece on move, whether or not it should add it to the list
             if right and self.inBoard(x+move,y) and has_piece(x+move,y,pieces,self.color) is None:
-                moves.append([x+right,y])
+                moves.append([x+move,y])
                 
             elif right and self.inBoard(x+move,y) and has_piece(x+move,y,pieces,self.color) is not None:
                 if isinstance(has_piece(x+move,y,pieces,self.color), Piece):
@@ -79,7 +127,7 @@ class Rook(Piece):
                 
                 
             if up and self.inBoard(x,y-move) and has_piece(x,y-move,pieces,self.color) is None:
-                moves.append([x,y-up])
+                moves.append([x,y-move])
                 
             elif up and self.inBoard(x,y-move) and has_piece(x,y-move,pieces,self.color) is not None:
                 if isinstance(has_piece(x,y-move,pieces,self.color), Piece):
@@ -88,6 +136,8 @@ class Rook(Piece):
                 
             else:
                 up = False    
+        
+        moves = [move for move in moves if not self.checkForChecks(pieces, move)] if not skipCheck else moves
         return moves
     
 class Bishop(Piece):
@@ -95,7 +145,7 @@ class Bishop(Piece):
         super().__init__(color, x, y)
         self.image = pygame.image.load("icons/Bishop " + self.color + ".png")
 
-    def validMoves(self, pieces):
+    def validMoves(self, pieces, skipCheck = False):
         # Initiate default values
         moves = []
         x = self.x
@@ -157,6 +207,8 @@ class Bishop(Piece):
             
             else:
                 leftDown = False
+
+        moves = [move for move in moves if not self.checkForChecks(pieces, move)] if not skipCheck else moves
         return moves
 
 class Knight(Piece):
@@ -164,7 +216,7 @@ class Knight(Piece):
         super().__init__(color, x, y)
         self.image = pygame.image.load("icons/Knight " + self.color + ".png")
 
-    def validMoves(self, pieces):
+    def validMoves(self, pieces, skipCheck = False):
         # Initiate default values
         moves = []
         moves = []
@@ -198,6 +250,7 @@ class Knight(Piece):
                 else:
                     pass
            
+        moves = [move for move in moves if not self.checkForChecks(pieces, move)] if not skipCheck else moves
         return moves
 
 class Queen(Piece):
@@ -205,7 +258,7 @@ class Queen(Piece):
         super().__init__(color, x, y)
         self.image = pygame.image.load("icons/Queen " + self.color + ".png")
 
-    def validMoves(self, pieces):
+    def validMoves(self, pieces, skipCheck = False):
         # Initiate default values
         moves = []
         x = self.x
@@ -322,6 +375,7 @@ class Queen(Piece):
             else:
                 rightUp = False
         
+        moves = [move for move in moves if not self.checkForChecks(pieces, move)] if not skipCheck else moves
         return moves
             
 
@@ -331,7 +385,7 @@ class King(Piece):
         self.image = pygame.image.load("icons/King " + self.color + ".png")
         self.castle = True
     
-    def validMoves(self, pieces):
+    def validMoves(self, pieces, skipCheck = False):
         # Initiate default values
         moves = []
         moves = []
@@ -351,6 +405,8 @@ class King(Piece):
                     moves.append([x + moveX, y + moveY, 'Attack'])
                 else:
                     pass
+        
+        moves = [move for move in moves if not self.checkForChecks(pieces, move)] if not skipCheck else moves
         return moves
     
     def disableCastle(self):
@@ -363,7 +419,7 @@ class Pawn(Piece):
         self.isMoved = False
         self.enpassant = False
     
-    def validMoves(self, pieces):
+    def validMoves(self, pieces, skipCheck = False):
         # Initiate default values
         moves = []
         x = self.x
@@ -395,15 +451,13 @@ class Pawn(Piece):
                 dy -= 1
                 moves.append([x, y+dy])
             
-            # Returns possible moves
-            return moves
                 
         # Black variation
         elif self.isMoved == False and self.color == 'Black':            
             while self.inBoard(x, y+1+dy) and has_piece(x, y+1+dy, pieces, 'any') == None and dy < 2:
                 dy += 1
                 moves.append([x, y+dy])
-            return moves
+            
         
        
         # Possible moves after Pawn is moved
@@ -412,14 +466,14 @@ class Pawn(Piece):
             if has_piece(x, y-1, pieces, self.color) == None:
                 moves.append([x, y-1])
             
-            # Returns possible moves
-            return moves
         # Black variation
         elif self.color == 'Black':
             if has_piece(x, y+1, pieces, self.color) == None:
                 moves.append([x, y+1])
-            return moves
-
+            
+        moves = [move for move in moves if not self.checkForChecks(pieces, move)] if not skipCheck else moves
+        return moves
+    
     def moved(self, double):
         self.isMoved = True
         if double == True:

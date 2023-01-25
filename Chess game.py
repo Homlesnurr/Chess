@@ -13,6 +13,7 @@ size = width, height = 480, 480
 
 # Create the window
 screen = pygame.display.set_mode(size)
+seethrough = pygame.display.set_mode(size, pygame.SRCALPHA)
 
 pieces = []
 
@@ -29,11 +30,11 @@ for x in range(8):
                 a = Queen("Black", y, x)
             if y == 4:
                 a = King("Black", y, x)
-        if x == 1:
-            a = Pawn("Black", y, x)
-        if x == 6:
+        elif x == 1:
+            a = Pawn("Black", y, x)           
+        elif x == 6:
             a = Pawn("White", y, x)
-        if x == 7:
+        elif x == 7:
             if y == 0 or y == 7:
                 a = Rook("White", y, x)
             if y == 1 or y == 6:
@@ -44,6 +45,8 @@ for x in range(8):
                 a = Queen("White", y, x)
             if y == 4:
                 a = King("White", y, x)
+        else:
+            continue
         pieces.append(a)
 
 # Create a 2D list to represent the chess board
@@ -74,88 +77,82 @@ def updateState():
             active_piece.moved(False)
     elif active_piece.__class__ == King:
         active_piece.disableCastle()
+
+# Checks for if the game is over:
+def checks():
+    # Defaults stalemate and checkmate to True, and changes it to False if there is a valid move
+                    stalemate = True
+                    checkmate = True
+                    reportCheck = False
                     
+                    # Looks if there are only 2 pieces left
+                    if len(pieces) == 2:
+                        return 'stalemate'
+                    
+                    # Checks if king is in check
+                    for piece in pieces:
+                        # Checks own pieces that have valid moves
+                        if piece.color == turn and piece.validMoves(pieces):
+                            # Looks through valid moves of own pieces
+                            for move in piece.validMoves(pieces):
+                                # If there is a king on the valid move, then it is in check
+                                if isinstance(has_piece(move[0], move[1], pieces, turn), King):
+                                    reportCheck = True
+                                    break
+                        
+                        # Checks if other color has valid moves
+                        if piece.color != turn and piece.validMoves(pieces):
+                            # If there is a valid move, then it cant be checkmate
+                            checkmate = False
+                            # If there is not a valid move, then it is stalemate
+                            stalemate = False
+                        
+                        # Checks if it is the last piece
+                        if piece == pieces[-1]:
+                            # If it is checkmate, then the game ends
+                            if checkmate and reportCheck:
+                                return 'checkmate'
+                    
+                            # If it is stalemate, then the game ends
+                            elif stalemate and not reportCheck:
+                                return 'stalemate'
+                            
+                            elif reportCheck:
+                                return 'check'
+                            
+                            else:
+                                return 'move'
 # Run the game loop
 
 active_piece = None
 turn = 'White'
 valid_moves = []
-in_valid_moves = False
 holding = False
 
+running = True
+end = False
 
-capture1 = pygame.mixer.Sound('sfx/capture1.wav')
-capture2 = pygame.mixer.Sound('sfx/capture2.wav')
-castle1 = pygame.mixer.Sound('sfx/castle1.wav')
-castle2 = pygame.mixer.Sound('sfx/castle2.wav')
-check1 = pygame.mixer.Sound('sfx/check1.wav')
-check2 = pygame.mixer.Sound('sfx/check2.wav')
-move1 = pygame.mixer.Sound('sfx/move1.wav')
-move2 = pygame.mixer.Sound('sfx/move2.wav')
-ough = pygame.mixer.Sound('sfx/ough.ogg')
+stalemate = False
+checkmate = False
 
-capture = [pygame.mixer.Sound('sfx/capture1.wav'), pygame.mixer.Sound('sfx/capture2.wav'), pygame.mixer.Sound('sfx/ough.ogg')]
+reportCheck = False
+reportCapture = False
+reportMove = False
+
+capture = [pygame.mixer.Sound('sfx/capture1.wav'), pygame.mixer.Sound('sfx/capture2.wav')]
 castle = [pygame.mixer.Sound('sfx/castle1.wav'), pygame.mixer.Sound('sfx/castle2.wav')]
 check = [pygame.mixer.Sound('sfx/check1.wav'), pygame.mixer.Sound('sfx/check2.wav')]
 movesound = [pygame.mixer.Sound('sfx/move1.wav'), pygame.mixer.Sound('sfx/move2.wav')]
+checkmatesound = pygame.mixer.Sound('sfx/checkmate.wav')
+stalematesound = pygame.mixer.Sound('sfx/ough.ogg')
 
 
 using_pawn = False
 
-while True:
+while running:
     for event in pygame.event.get():
-        
-        # # Check for mouse clicks
-        # if event.type == pygame.MOUSEBUTTONDOWN and valid_moves:
-        #     # Get the mouse position
-        #     mouse_pos = event.pos
-            
-        #     # Change the x/y screen coordinates to grid coordinates
-        #     column = mouse_pos[0] // (width // 8)
-        #     row = mouse_pos[1] // (height // 8)
-            
-        #     if [column, row] in valid_moves:
-        #         updateState()
-        #         active_piece.lastPlacedX = column
-        #         active_piece.lastPlacedY = row
-        #         active_piece.x = column
-        #         active_piece.y = row
-        #         active_piece = None
-        #         turn = 'White' if turn == 'Black' else 'Black'
-        #         valid_moves = []
-            
-        #     elif [column, row] not in valid_moves and has_piece(column, row, pieces, turn) is None:
-        #         active_piece = None
-        #         valid_moves = []
-        #     else:
-        #         # makes active_piece if it is a piece, and if the piece is the correct color
-        #         piece_select = has_piece(column, row, pieces, 'nuthin')
-                
-        #         # Make it so you're holding the piece (reset when you release mouse1)
-        #         holding = True if piece_select else False
-                
-        #         # Changes active piece if you click on a different piece and it is the correct color, otherwise it stays the same
-        #         if active_piece:
-        #             active_piece = piece_select if piece_select is not None and piece_select.color == turn else active_piece
-        #         else:
-        #             active_piece = piece_select if piece_select is not None and piece_select.color == turn else None
-                
-        #         # Changes using_pawn to true if the active piece is a pawn
-        #         if active_piece.__class__ == Pawn:
-        #             using_pawn = True
-        #         else:
-        #             using_pawn = False
-                
-        #         # Reveal available places piece can move 
-        #         if active_piece is not None and active_piece.validMoves(pieces):
-        #             valid_moves = active_piece.validMoves(pieces) 
-        #         elif active_piece is not None and not active_piece.validMoves(pieces):
-        #             valid_moves = []
-        #         else:
-        #             valid_moves
-        
         # Check for mouse clicks
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and not end:
             # Sets holding to true so that the piece can be moved
             holding = True
             
@@ -195,7 +192,7 @@ while True:
                 valid_moves = []
 
         # moves the piece when mouse1 is held down
-        elif event.type == pygame.MOUSEMOTION and active_piece is not None and holding:
+        elif event.type == pygame.MOUSEMOTION and not end and active_piece is not None and holding:
             # Finds the exact x/y coordinates 
             mouse_pos = event.pos
             column = mouse_pos[0] / (width / 8)
@@ -206,7 +203,7 @@ while True:
             active_piece.y = row
 
         # Places piece on square, and removes the piece already on the square, if it exists AND it is holding a piece
-        elif event.type == pygame.MOUSEBUTTONUP and active_piece is not None:
+        elif event.type == pygame.MOUSEBUTTONUP and not end and active_piece is not None:
             # Resets holding
             holding = False
             
@@ -217,12 +214,11 @@ while True:
             
             
             # Checks if where mouse is holding over is in valid_moves
+            in_valid_moves = False
             for i in valid_moves:
                 if i[0] == column and i[1] == row:
                     in_valid_moves = True
                     break
-                else:
-                    in_valid_moves = False
             
             # Moves piece back to original position if it is not a valid move        
             if in_valid_moves == False and active_piece and has_piece(column, row, pieces, turn) is None:
@@ -242,9 +238,9 @@ while True:
                 attacked_Piece = attacked_square if isinstance(attacked_square, Piece) else None
                 
                 # Removes attacked_Piece if theres a piece of the opposite color
-                if attacked_Piece is not None:
+                if isinstance(attacked_Piece, Piece):
                     pieces.remove(attacked_Piece)
-                    pygame.mixer.Sound.play(random.choice(capture))
+                    reportCapture = True
                 
                 # Checks if pawn is attacking enpassant
                 elif active_piece.__class__.__name__ == 'Pawn':
@@ -253,44 +249,75 @@ while True:
                             if turn == 'White':
                                 if piece.x == column and piece.y == row+1:
                                     pieces.remove(piece)
-                                    pygame.mixer.Sound.play(random.choice(capture))
+                                    reportCapture = True
                             elif turn == 'Black':
                                 if piece.x == column and piece.y == row-1:
                                     pieces.remove(piece)
-                                    pygame.mixer.Sound.play(random.choice(capture))                                    
+                                    reportCapture = True                                    
                     
                 # Changes active piece location to where mouse1 was released
                 active_piece.x = column
                 active_piece.y = row
-                pygame.mixer.Sound.play(random.choice(movesound))
+                reportMove = True
                 
                 
                 # Next turn if piece is placed in a new position
                 if turn == 'White' and (active_piece.x != active_piece.lastPlacedX or active_piece.y != active_piece.lastPlacedY):
-                    turn = 'Black'
-                    updateState()
                     active_piece.lastPlacedX = active_piece.x
                     active_piece.lastPlacedY = active_piece.y
+                    
+                    # Looks for check, checkmate, and stalemate
+                    check_state = checks()
+                    
+                    turn = 'Black'
+                    updateState()
                     # There is no active_piece anymore, so it is set to None
                     active_piece = None
                 elif turn == 'Black' and (active_piece.x != active_piece.lastPlacedX or active_piece.y != active_piece.lastPlacedY):
-                    turn = 'White'
-                    updateState()
                     active_piece.lastPlacedX = active_piece.x
                     active_piece.lastPlacedY = active_piece.y
+                    
+                    # Looks for check, checkmate, and stalemate
+                    check_state = checks()
+                            
+                    turn = 'White'
+                    updateState()
                     # There is no active_piece anymore, so it is set to None
                     active_piece = None
                 valid_moves= []
                 
-
-            
+                    
+                # Plays sounds
+                if check_state == 'checkmate':
+                    pygame.mixer.Sound.play(checkmatesound)
+                    end = True
+                elif check_state == 'stalemate':
+                    pygame.mixer.Sound('sfx/ough.ogg')
+                    end = True
+                elif check_state == 'check':
+                    pygame.mixer.Sound.play(random.choice(check))
+                elif check_state == 'move':
+                    pygame.mixer.Sound.play(random.choice(movesound))
+                
+                reportCheck = False
+                reportCapture = False
+                reportMove = False
+                
+                if end:
+                    if check_state == 'checkmate':
+                        if turn == 'White':
+                            print('Black wins!')
+                        else:
+                            print('White wins!')
+                    else:
+                        print('You both lose :P')            
              
         elif event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
         
 
-
+    
     # Draw the chess board
     for row in range(8):
         for col in range(8):
