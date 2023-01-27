@@ -72,6 +72,7 @@ class Rook(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
         self.image = pygame.image.load("icons/Rook " + self.color + ".png")
+        self.castle = True
 
     def validMoves(self, pieces, skipCheck = False):
         # Initiate default values
@@ -139,6 +140,9 @@ class Rook(Piece):
         
         moves = [move for move in moves if not self.checkForChecks(pieces, move)] if not skipCheck else moves
         return moves
+    
+    def disableCastle(self):
+        self.castle = False
     
 class Bishop(Piece):
     def __init__(self, color, x, y):
@@ -405,8 +409,31 @@ class King(Piece):
                     moves.append([x + moveX, y + moveY, 'Attack'])
                 else:
                     pass
+                
+        
+        # Checks if the king can castle
+        castleLeft = True
+        castleRight = True
+            
+        if self.castle:  # checks if there is a rook on the right side that can castle
+            for m in range(-3,3):
+                if  m != 0 and isinstance(has_piece(self.x + m, self.y, pieces, 'any'), Piece):
+                    if m > 0:
+                        castleRight = False
+                    elif m < 0:
+                        castleLeft = False
+            if castleLeft and isinstance(has_piece(0, self.y, pieces, 'any'), Rook) and has_piece(0, self.y, pieces, 'any').castle:
+                moves.append([self.x - 2, self.y, 'Castle'])
+            if castleRight and isinstance(has_piece(7, self.y, pieces, 'any'), Rook) and has_piece(7, self.y, pieces, 'any').castle:
+                moves.append([self.x + 2, self.y, 'Castle'])
         
         moves = [move for move in moves if not self.checkForChecks(pieces, move)] if not skipCheck else moves
+        
+        for move in moves:
+            if 'Castle' in move:
+                if not [move[0]-1, move[1]] in moves and not [move[0]+1, move[1]] in moves:
+                    moves.remove(move)
+        
         return moves
     
     def disableCastle(self):

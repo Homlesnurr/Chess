@@ -13,7 +13,6 @@ size = width, height = 480, 480
 
 # Create the window
 screen = pygame.display.set_mode(size)
-seethrough = pygame.display.set_mode(size, pygame.SRCALPHA)
 
 pieces = []
 
@@ -76,6 +75,8 @@ def updateState():
         else:
             active_piece.moved(False)
     elif active_piece.__class__ == King:
+        active_piece.disableCastle()
+    elif active_piece.__class__ == Rook:
         active_piece.disableCastle()
 
 # Checks for if the game is over:
@@ -260,6 +261,12 @@ while running:
                 active_piece.y = row
                 reportMove = True
                 
+                # If the king castled the rook moves
+                if active_piece.__class__.__name__ == 'King':
+                    if active_piece.x == active_piece.lastPlacedX + 2:
+                        has_piece(7, active_piece.y, pieces, 'any').x = has_piece(7, active_piece.y, pieces, 'any').lastplacedX = 5
+                    if active_piece.x == active_piece.lastPlacedX - 2:
+                        has_piece(0, active_piece.y, pieces, 'any').x = has_piece(0, active_piece.y, pieces, 'any').lastplacedX = 3
                 
                 # Next turn if piece is placed in a new position
                 if turn == 'White' and (active_piece.x != active_piece.lastPlacedX or active_piece.y != active_piece.lastPlacedY):
@@ -306,9 +313,9 @@ while running:
                 if end:
                     if check_state == 'checkmate':
                         if turn == 'White':
-                            print('Black wins!')
+                            winner = ('icons/Black wins.png')
                         else:
-                            print('White wins!')
+                            winner = ('icons/White wins.png')
                     else:
                         print('You both lose :P')            
              
@@ -340,10 +347,14 @@ while running:
     
     # Draw valid moves   
     for move in valid_moves:
-        if len(move) == 3:
+        if 'Attack' in move:
             pygame.draw.circle(screen, color=(255,0,0), center=(move[0]*60 + 30, move[1]*60 + 30), radius=10, width=3)
+        elif 'Castle' in move:
+            pygame.draw.circle(screen, color=(0,0,255), center=(move[0]*60 + 30, move[1]*60 + 30), radius=10, width=3)
         else:
             pygame.draw.circle(screen, color=(55,55,55), center=(move[0]*60 + 30, move[1]*60 + 30), radius=10, width=3)
 
+    if end:
+        screen.blit(pygame.image.load(winner), (0,0))
 
     pygame.display.flip()
