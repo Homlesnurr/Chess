@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import os
 
 from Pieces import *
 from HasPiece import *
@@ -14,8 +15,10 @@ size = width, height = 480, 480
 # Create the window
 screen = pygame.display.set_mode(size)
 
-pieces = []
+# Create a default path
+dir_path = os.path.dirname(__file__)
 
+pieces = []
 for x in range(8):
     for y in range(8):
         if x == 0:
@@ -140,12 +143,12 @@ reportCheck = False
 reportCapture = False
 reportMove = False
 
-capture = [pygame.mixer.Sound('sfx/capture1.wav'), pygame.mixer.Sound('sfx/capture2.wav')]
-castle = [pygame.mixer.Sound('sfx/castle1.wav'), pygame.mixer.Sound('sfx/castle2.wav')]
-check = [pygame.mixer.Sound('sfx/check1.wav'), pygame.mixer.Sound('sfx/check2.wav')]
-movesound = [pygame.mixer.Sound('sfx/move1.wav'), pygame.mixer.Sound('sfx/move2.wav')]
-checkmatesound = pygame.mixer.Sound('sfx/checkmate.wav')
-stalematesound = pygame.mixer.Sound('sfx/ough.ogg')
+capture = [pygame.mixer.Sound(f'{dir_path}\\sfx\\capture1.wav'), pygame.mixer.Sound(f'{dir_path}\\sfx\\capture2.wav')]
+castle = [pygame.mixer.Sound(f'{dir_path}\\sfx\\castle1.wav'), pygame.mixer.Sound(f'{dir_path}\\sfx\\castle2.wav')]
+check = [pygame.mixer.Sound(f'{dir_path}\\sfx\\check1.wav'), pygame.mixer.Sound(f'{dir_path}\\sfx\\check2.wav')]
+movesound = [pygame.mixer.Sound(f'{dir_path}\\sfx\\move1.wav'), pygame.mixer.Sound(f'{dir_path}\\sfx\\move2.wav')]
+checkmatesound = pygame.mixer.Sound(f'{dir_path}\\sfx\\checkmate.wav')
+# stalematesound = pygame.mixer.Sound(f'{dir_path}\\sfx\\ough.ogg')
 
 
 using_pawn = False
@@ -299,7 +302,7 @@ while running:
                     pygame.mixer.Sound.play(checkmatesound)
                     end = True
                 elif check_state == 'stalemate':
-                    pygame.mixer.Sound('sfx/ough.ogg')
+                    # pygame.mixer.Sound(f'{dir_path}\\sfx\\ough.ogg')
                     end = True
                 elif check_state == 'check':
                     pygame.mixer.Sound.play(random.choice(check))
@@ -313,9 +316,9 @@ while running:
                 if end:
                     if check_state == 'checkmate':
                         if turn == 'White':
-                            winner = ('icons/Black wins.png')
+                            winner = (f'{dir_path}\\icons\\Black wins.png')
                         else:
-                            winner = ('icons/White wins.png')
+                            winner = (f'{dir_path}\\icons\\White wins.png')
                     else:
                         print('You both lose :P')            
              
