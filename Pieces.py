@@ -1,5 +1,10 @@
 import pygame
+import os
 from HasPiece import *
+
+piece_path = os.path.dirname(__file__) 
+
+
 
 class Piece:
     def __init__(self, color, x, y):
@@ -71,7 +76,7 @@ class Piece:
 class Rook(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
-        self.image = pygame.image.load("icons/Rook " + self.color + ".png")
+        self.image = pygame.image.load(f'{piece_path}\\icons\\Rook {self.color}.png')
         self.castle = True
 
     def validMoves(self, pieces, skipCheck = False):
@@ -147,7 +152,7 @@ class Rook(Piece):
 class Bishop(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
-        self.image = pygame.image.load("icons/Bishop " + self.color + ".png")
+        self.image = pygame.image.load(f'{piece_path}\\icons\\Bishop {self.color}.png')
 
     def validMoves(self, pieces, skipCheck = False):
         # Initiate default values
@@ -218,7 +223,7 @@ class Bishop(Piece):
 class Knight(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
-        self.image = pygame.image.load("icons/Knight " + self.color + ".png")
+        self.image = pygame.image.load(f'{piece_path}\\icons\\Knight {self.color}.png')
 
     def validMoves(self, pieces, skipCheck = False):
         # Initiate default values
@@ -260,7 +265,7 @@ class Knight(Piece):
 class Queen(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
-        self.image = pygame.image.load("icons/Queen " + self.color + ".png")
+        self.image = pygame.image.load(f'{piece_path}\\icons\\Queen {self.color}.png')
 
     def validMoves(self, pieces, skipCheck = False):
         # Initiate default values
@@ -386,7 +391,7 @@ class Queen(Piece):
 class King(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
-        self.image = pygame.image.load("icons/King " + self.color + ".png")
+        self.image = pygame.image.load(f'{piece_path}\\icons\\King {self.color}.png')
         self.castle = True
     
     def validMoves(self, pieces, skipCheck = False):
@@ -442,7 +447,7 @@ class King(Piece):
 class Pawn(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
-        self.image = pygame.image.load("icons/Pawn " + self.color + ".png")
+        self.image = pygame.image.load(f'{piece_path}\\icons\\Pawn {self.color}.png')
         self.isMoved = False
         self.enpassant = False
     
