@@ -85,47 +85,47 @@ def updateState():
 # Checks for if the game is over:
 def checks():
     # Defaults stalemate and checkmate to True, and changes it to False if there is a valid move
-                    stalemate = True
-                    checkmate = True
-                    reportCheck = False
-                    
-                    # Looks if there are only 2 pieces left
-                    if len(pieces) == 2:
-                        return 'stalemate'
-                    
-                    # Checks if king is in check
-                    for piece in pieces:
-                        # Checks own pieces that have valid moves
-                        if piece.color == turn and piece.validMoves(pieces):
-                            # Looks through valid moves of own pieces
-                            for move in piece.validMoves(pieces):
-                                # If there is a king on the valid move, then it is in check
-                                if isinstance(has_piece(move[0], move[1], pieces, turn), King):
-                                    reportCheck = True
-                                    break
-                        
-                        # Checks if other color has valid moves
-                        if piece.color != turn and piece.validMoves(pieces):
-                            # If there is a valid move, then it cant be checkmate
-                            checkmate = False
-                            # If there is not a valid move, then it is stalemate
-                            stalemate = False
-                        
-                        # Checks if it is the last piece
-                        if piece == pieces[-1]:
-                            # If it is checkmate, then the game ends
-                            if checkmate and reportCheck:
-                                return 'checkmate'
-                    
-                            # If it is stalemate, then the game ends
-                            elif stalemate and not reportCheck:
-                                return 'stalemate'
-                            
-                            elif reportCheck:
-                                return 'check'
-                            
-                            else:
-                                return 'move'
+    stalemate = True
+    checkmate = True
+    reportCheck = False
+    
+    # Looks if there are only 2 pieces left
+    if len(pieces) == 2:
+        return 'stalemate'
+    
+    # Checks if king is in check
+    for piece in pieces:
+        # Checks own pieces that have valid moves
+        if piece.color == turn and piece.validMoves(pieces):
+            # Looks through valid moves of own pieces
+            for move in piece.validMoves(pieces):
+                # If there is a king on the valid move, then it is in check
+                if isinstance(has_piece(move[0], move[1], pieces, turn), King):
+                    reportCheck = True
+                    break
+        
+        # Checks if other color has valid moves
+        if piece.color != turn and piece.validMoves(pieces):
+            # If there is a valid move, then it cant be checkmate
+            checkmate = False
+            # If there is not a valid move, then it is stalemate
+            stalemate = False
+        
+        # Checks if it is the last piece
+        if piece == pieces[-1]:
+            # If it is checkmate, then the game ends
+            if checkmate and reportCheck:
+                return 'checkmate'
+    
+            # If it is stalemate, then the game ends
+            elif stalemate and not reportCheck:
+                return 'stalemate'
+            
+            elif reportCheck:
+                return 'check'
+            
+            else:
+                return 'move'
 # Run the game loop
 
 active_piece = None
@@ -273,6 +273,7 @@ while running:
                 
                 # Next turn if piece is placed in a new position
                 if turn == 'White' and (active_piece.x != active_piece.lastPlacedX or active_piece.y != active_piece.lastPlacedY):
+                    updateState()
                     active_piece.lastPlacedX = active_piece.x
                     active_piece.lastPlacedY = active_piece.y
                     
@@ -280,10 +281,10 @@ while running:
                     check_state = checks()
                     
                     turn = 'Black'
-                    updateState()
                     # There is no active_piece anymore, so it is set to None
                     active_piece = None
                 elif turn == 'Black' and (active_piece.x != active_piece.lastPlacedX or active_piece.y != active_piece.lastPlacedY):
+                    updateState()
                     active_piece.lastPlacedX = active_piece.x
                     active_piece.lastPlacedY = active_piece.y
                     
@@ -291,7 +292,6 @@ while running:
                     check_state = checks()
                             
                     turn = 'White'
-                    updateState()
                     # There is no active_piece anymore, so it is set to None
                     active_piece = None
                 valid_moves= []
