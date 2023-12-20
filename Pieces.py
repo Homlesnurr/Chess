@@ -44,6 +44,11 @@ class Piece:
         self.lastPlacedX = move[0]
         self.lastPlacedY = move[1]
         
+        save_piece = has_piece(move[0], move[1], pieces, self.color)
+        
+        if save_piece:
+            pieces.remove(save_piece)
+
         '''At this point, the piece has been moved, but it will be moved back to its original position at the end of the function'''
         
         # Finds the king
@@ -61,15 +66,21 @@ class Piece:
                     if self.lastPlacedX == piece.x and self.lastPlacedY == piece.y:
                         self.lastPlacedX = oldX
                         self.lastPlacedY = oldY
+                        if save_piece:
+                            pieces.append(save_piece)
                         return False
                     # If the moving piece can't attack the checking piece and cant stop a check, this if statement will be true, and the move will not be allowed
                     self.lastPlacedX = oldX
                     self.lastPlacedY = oldY
+                    if save_piece:
+                        pieces.append(save_piece)
                     return True
                 
         # If the king is not in check, this will be returned
         self.lastPlacedX = oldX
         self.lastPlacedY = oldY
+        if save_piece:
+            pieces.append(save_piece)
         return False
 
 class Rook(Piece):
