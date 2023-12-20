@@ -22,25 +22,25 @@ pieces = []
 for x in range(8):
     for y in range(8):
         if x == 0:
-            # if y == 0 or y == 7:
-            #     pieces.append(Rook("Black", y, x))
-            # if y == 1 or y == 6:
-            #     pieces.append(Knight("Black", y, x))
+            if y == 0 or y == 7:
+                pieces.append(Rook("Black", y, x))
+            if y == 1 or y == 6:
+                pieces.append(Knight("Black", y, x))
             if y == 2 or y == 5:
                 pieces.append(Bishop("Black", y, x))
             if y == 3:
                 pieces.append(Queen("Black", y, x))
             if y == 4:
                 pieces.append(King("Black", y, x))
-        # elif x == 1:
-        #     pieces.append(Pawn("Black", y, x))
-        # elif x == 6:
-        #     pieces.append(Pawn("White", y, x))
+        elif x == 1:
+            pieces.append(Pawn("Black", y, x))
+        elif x == 6:
+            pieces.append(Pawn("White", y, x))
         elif x == 7:
-            # if y == 0 or y == 7:
-            #     pieces.append(Rook("White", y, x))
-            # if y == 1 or y == 6:
-            #     pieces.append(Knight("White", y, x))
+            if y == 0 or y == 7:
+                pieces.append(Rook("White", y, x))
+            if y == 1 or y == 6:
+                pieces.append(Knight("White", y, x))
             if y == 2 or y == 5:
                 pieces.append(Bishop("White", y, x))
             if y == 3:
