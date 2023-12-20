@@ -22,34 +22,33 @@ pieces = []
 for x in range(8):
     for y in range(8):
         if x == 0:
-            if y == 0 or y == 7:
-                a = Rook("Black", y, x)
-            if y == 1 or y == 6:
-                a = Knight("Black", y, x)
+            # if y == 0 or y == 7:
+            #     pieces.append(Rook("Black", y, x))
+            # if y == 1 or y == 6:
+            #     pieces.append(Knight("Black", y, x))
             if y == 2 or y == 5:
-                a = Bishop("Black", y, x)
+                pieces.append(Bishop("Black", y, x))
             if y == 3:
-                a = Queen("Black", y, x)
+                pieces.append(Queen("Black", y, x))
             if y == 4:
-                a = King("Black", y, x)
-        elif x == 1:
-            a = Pawn("Black", y, x)           
-        elif x == 6:
-            a = Pawn("White", y, x)
+                pieces.append(King("Black", y, x))
+        # elif x == 1:
+        #     pieces.append(Pawn("Black", y, x))
+        # elif x == 6:
+        #     pieces.append(Pawn("White", y, x))
         elif x == 7:
-            if y == 0 or y == 7:
-                a = Rook("White", y, x)
-            if y == 1 or y == 6:
-                a = Knight("White", y, x)
+            # if y == 0 or y == 7:
+            #     pieces.append(Rook("White", y, x))
+            # if y == 1 or y == 6:
+            #     pieces.append(Knight("White", y, x))
             if y == 2 or y == 5:
-                a = Bishop("White", y, x)
+                pieces.append(Bishop("White", y, x))
             if y == 3:
-                a = Queen("White", y, x)
+                pieces.append(Queen("White", y, x))
             if y == 4:
-                a = King("White", y, x)
+                pieces.append(King("White", y, x))
         else:
             continue
-        pieces.append(a)
 
 # Create a 2D list to represent the chess board
 board = [[0 for x in range(8)] for y in range(8)]
@@ -166,6 +165,8 @@ def updateState():
         if active_piece.y == 7 or active_piece.y == 0:
             promote(active_piece)
     elif active_piece.__class__ == King:
+        if active_piece.x == active_piece.lastPlacedX + 2 or active_piece.x == active_piece.lastPlacedX - 2:
+            castled = True
         active_piece.disableCastle()
     elif active_piece.__class__ == Rook:
         active_piece.disableCastle()
@@ -226,6 +227,8 @@ end = False
 
 stalemate = False
 checkmate = False
+capapiece = False
+castled = False
 
 reportCheck = False
 reportCapture = False
@@ -236,7 +239,7 @@ castle = [pygame.mixer.Sound(f'{dir_path}\\sfx\\castle1.wav'), pygame.mixer.Soun
 check = [pygame.mixer.Sound(f'{dir_path}\\sfx\\check1.wav'), pygame.mixer.Sound(f'{dir_path}\\sfx\\check2.wav')]
 movesound = [pygame.mixer.Sound(f'{dir_path}\\sfx\\move1.wav'), pygame.mixer.Sound(f'{dir_path}\\sfx\\move2.wav')]
 checkmatesound = pygame.mixer.Sound(f'{dir_path}\\sfx\\checkmate.wav')
-# stalematesound = pygame.mixer.Sound(f'{dir_path}\\sfx\\ough.ogg')
+stalematesound = pygame.mixer.Sound(f'{dir_path}\\sfx\\ough.mp3')
 
 
 using_pawn = False
@@ -333,6 +336,7 @@ while running:
                 if isinstance(attacked_Piece, Piece):
                     pieces.remove(attacked_Piece)
                     reportCapture = True
+                    capapiece = True
                 
                 # Checks if pawn is attacking enpassant
                 elif active_piece.__class__.__name__ == 'Pawn':
@@ -342,10 +346,12 @@ while running:
                                 if piece.x == column and piece.y == row+1:
                                     pieces.remove(piece)
                                     reportCapture = True
+                                    capapiece = True
                             elif turn == 'Black':
                                 if piece.x == column and piece.y == row-1:
                                     pieces.remove(piece)
-                                    reportCapture = True                                    
+                                    reportCapture = True
+                                    capapiece = True                                
                     
                 # Changes active piece location to where mouse1 was released
                 active_piece.x = column
@@ -384,22 +390,44 @@ while running:
                     active_piece = None
                 valid_moves= []
                 
+                if len(pieces) == 2:
+                    check_state = 'stalemate'
+                elif len(pieces) == 3:
+                    for piece in pieces:
+                        if piece.__class__ == Bishop or piece.__class__ == Knight:
+                            check_state = 'stalemate'
+                elif len(pieces) == 4:
+                    bishops = []
+                    for piece in pieces:
+                        if piece.__class__ == Bishop:
+                            bishops.append(piece)
+                    if bishops and len(bishops) == 2:
+                        if bishops[0].color != bishops[1].color:
+                            if (bishops[0].x + bishops[0].y) % 2 == (bishops[1].x + bishops[1].y) % 2:
+                                check_state = 'stalemate'
                     
+                        
                 # Plays sounds
                 if check_state == 'checkmate':
                     pygame.mixer.Sound.play(checkmatesound)
                     end = True
                 elif check_state == 'stalemate':
-                    # pygame.mixer.Sound(f'{dir_path}\\sfx\\ough.ogg')
+                    pygame.mixer.Sound.play(stalematesound)
                     end = True
                 elif check_state == 'check':
-                    pygame.mixer.Sound.play(random.choice(check))
-                elif check_state == 'move':
-                    pygame.mixer.Sound.play(random.choice(movesound))
+                    pygame.mixer.Sound.play(check[random.randint(0,1)])
+                elif capapiece:
+                    pygame.mixer.Sound.play(capture[random.randint(0,1)])
+                elif castled:
+                    pygame.mixer.Sound.play(castle[random.randint(0,1)])
+                else:
+                    pygame.mixer.Sound.play(movesound[random.randint(0,1)])
                 
                 reportCheck = False
                 reportCapture = False
                 reportMove = False
+                capapiece = False
+                castled = False
                 
                 if end:
                     if check_state == 'checkmate':
@@ -408,7 +436,7 @@ while running:
                         else:
                             winner = (f'{dir_path}\\icons\\White wins.png')
                     else:
-                        print('You both lose :P')            
+                        winner = (f'{dir_path}\\icons\\Draw.png')          
              
         elif event.type == pygame.QUIT:
             pygame.quit()
