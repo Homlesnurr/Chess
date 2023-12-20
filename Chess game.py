@@ -60,7 +60,92 @@ for row in range(8):
             board[row][col] = 1
         else:
             board[row][col] = 0
- 
+
+def draw():
+    
+    # Draw the chess board
+    for row in range(8):
+        for col in range(8):
+            if board[row][col] == 1:
+                color = (238,238,210) # white
+            else:
+                color = (118,150,86) # black
+            pygame.draw.rect(screen, color, (col*60, row*60, 60, 60))
+
+    # Draw pieces on table
+    for piece in pieces:
+        if active_piece is not None and active_piece is piece and isinstance(piece.x, float) and isinstance(piece.y, float):
+            piece.x -= 0.6
+            piece.y -= 0.6
+            piece.draw(screen)
+            piece.x += 0.6
+            piece.y += 0.6
+        else:
+            piece.draw(screen)
+    
+    # Draw valid moves   
+    for move in valid_moves:
+        if 'Attack' in move:
+            pygame.draw.circle(screen, color=(255,0,0), center=(move[0]*60 + 30, move[1]*60 + 30), radius=10, width=3)
+        elif 'Castle' in move:
+            pygame.draw.circle(screen, color=(0,0,255), center=(move[0]*60 + 30, move[1]*60 + 30), radius=10, width=3)
+        else:
+            pygame.draw.circle(screen, color=(55,55,55), center=(move[0]*60 + 30, move[1]*60 + 30), radius=10, width=3)
+
+    if end:
+        screen.blit(pygame.image.load(winner), (0,0))
+
+
+def promote(piece):
+    # Create a transparent surface
+    transparent_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+    buttons = pygame.Surface((width, height), pygame.SRCALPHA)
+    transparency = 128
+    transparent_surface.fill((0, 0, 0, transparency))
+    promoting = True
+    while promoting:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEMOTION:
+                mouse_pos = event.pos
+                x, y = mouse_pos[0], mouse_pos[1]
+                buttons.fill((0,0,0,0))
+                if y <= 270 and y >= 210:
+                    if x >= 105 and x <= 165:
+                        pygame.draw.rect(buttons, (30,30,30), (105,210,60,60), width=3)
+                    if x >= 175 and x <= 235:
+                        pygame.draw.rect(buttons, (30,30,30), (175,210,60,60), width=3)
+                    if x >= 245 and x <= 305:
+                        pygame.draw.rect(buttons, (30,30,30), (245,210,60,60), width=3)
+                    if x >= 315 and x <= 375:
+                        pygame.draw.rect(buttons, (30,30,30), (315,210,60,60), width=3)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if y <= 270 and y >= 210:
+                    if x >= 105 and x <= 165:
+                        pieces.remove(piece)
+                        pieces.append(Queen(piece.color,piece.x, piece.y))
+                        promoting = False
+                    if x >= 175 and x <= 235:
+                        pieces.remove(piece)
+                        pieces.append(Knight(piece.color,piece.x, piece.y))
+                        promoting = False
+                    if x >= 245 and x <= 305:
+                        pieces.remove(piece)
+                        pieces.append(Bishop(piece.color,piece.x, piece.y))
+                        promoting = False
+                    if x >= 315 and x <= 375:
+                        pieces.remove(piece)
+                        pieces.append(Rook(piece.color,piece.x, piece.y))
+                        promoting = False
+        draw()
+        screen.blit(transparent_surface, (0, 0))
+        screen.blit(pygame.image.load(f'{dir_path}\\icons\\Rook {piece.color}.png'), (315,210))
+        screen.blit(pygame.image.load(f'{dir_path}\\icons\\Bishop {piece.color}.png'), (245,210))
+        screen.blit(pygame.image.load(f'{dir_path}\\icons\\Knight {piece.color}.png'), (175,210))
+        screen.blit(pygame.image.load(f'{dir_path}\\icons\\Queen {piece.color}.png'), (105,210))
+        screen.blit(buttons, (0,0))
+        pygame.display.flip()
+    # Now you can handle button clicks and other events to select the promotion piece
+
 # Updates "isMoved" value if it exists
 def updateState():
     # Reset passant pieces
@@ -77,6 +162,9 @@ def updateState():
             active_piece.enpassant = True
         else:
             active_piece.moved(False)
+
+        if active_piece.y == 7 or active_piece.y == 0:
+            promote(active_piece)
     elif active_piece.__class__ == King:
         active_piece.disableCastle()
     elif active_piece.__class__ == Rook:
@@ -328,36 +416,5 @@ while running:
         
 
     
-    # Draw the chess board
-    for row in range(8):
-        for col in range(8):
-            if board[row][col] == 1:
-                color = (238,238,210) # white
-            else:
-                color = (118,150,86) # black
-            pygame.draw.rect(screen, color, (col*60, row*60, 60, 60))
-
-    # Draw pieces on table
-    for piece in pieces:
-        if active_piece is not None and active_piece is piece and isinstance(piece.x, float) and isinstance(piece.y, float):
-            piece.x -= 0.6
-            piece.y -= 0.6
-            piece.draw(screen)
-            piece.x += 0.6
-            piece.y += 0.6
-        else:
-            piece.draw(screen)
-    
-    # Draw valid moves   
-    for move in valid_moves:
-        if 'Attack' in move:
-            pygame.draw.circle(screen, color=(255,0,0), center=(move[0]*60 + 30, move[1]*60 + 30), radius=10, width=3)
-        elif 'Castle' in move:
-            pygame.draw.circle(screen, color=(0,0,255), center=(move[0]*60 + 30, move[1]*60 + 30), radius=10, width=3)
-        else:
-            pygame.draw.circle(screen, color=(55,55,55), center=(move[0]*60 + 30, move[1]*60 + 30), radius=10, width=3)
-
-    if end:
-        screen.blit(pygame.image.load(winner), (0,0))
-
+    draw()
     pygame.display.flip()

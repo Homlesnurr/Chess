@@ -5,7 +5,6 @@ from HasPiece import *
 piece_path = os.path.dirname(__file__) 
 
 
-
 class Piece:
     def __init__(self, color, x, y):
         self.color = color
@@ -387,7 +386,6 @@ class Queen(Piece):
         moves = [move for move in moves if not self.checkForChecks(pieces, move)] if not skipCheck else moves
         return moves
             
-
 class King(Piece):
     def __init__(self, color, x, y):
         super().__init__(color, x, y)
