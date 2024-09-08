@@ -239,7 +239,7 @@ castle = [pygame.mixer.Sound(f'{dir_path}\\sfx\\castle1.wav'), pygame.mixer.Soun
 check = [pygame.mixer.Sound(f'{dir_path}\\sfx\\check1.wav'), pygame.mixer.Sound(f'{dir_path}\\sfx\\check2.wav')]
 movesound = [pygame.mixer.Sound(f'{dir_path}\\sfx\\move1.wav'), pygame.mixer.Sound(f'{dir_path}\\sfx\\move2.wav')]
 checkmatesound = pygame.mixer.Sound(f'{dir_path}\\sfx\\checkmate.wav')
-stalematesound = pygame.mixer.Sound(f'{dir_path}\\sfx\\ough.mp3')
+stalematesound = pygame.mixer.Sound(f'{dir_path}\\sfx\\ough.wav')
 
 
 using_pawn = False
